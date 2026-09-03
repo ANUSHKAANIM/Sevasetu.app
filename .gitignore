@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# dev-only tooling, not part of the app
+/scripts/dev-mint-token.js
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

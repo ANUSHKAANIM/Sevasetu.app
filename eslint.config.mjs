@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Dev-only tooling script (gitignored), not part of the app bundle.
+    "scripts/dev-mint-token.js",
   ]),
 ]);
 
