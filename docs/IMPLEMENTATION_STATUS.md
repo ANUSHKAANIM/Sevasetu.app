@@ -4,11 +4,16 @@ Last updated: 2026-09-03
 
 ## Status: MVP feature-complete
 
-All 12 phases from the original build plan are implemented and verified
-(typecheck, lint, unit tests, dev-mode smoke tests across all three
-portals, and a full production build all pass). See the final report in
-the session that built this, or re-run the verification commands in
-[README.md](../README.md#testing) to confirm current state.
+All 12 phases from the original build plan are implemented and verified:
+typecheck, lint, unit tests, and a full production build all pass, and
+every major flow across all three portals was driven end-to-end in a real
+headless browser (login, search/filter, the complete hiring wizard
+through a live salary calculation, job-request accept -> active contract,
+attendance marking, mock payment confirmation, admin verification status
+changes persisting across a reload, and server-side form validation) —
+20/20 checks passed with zero browser console errors. Re-run the
+verification commands in [README.md](../README.md#testing) to confirm
+current state.
 
 ## Completed
 
@@ -61,12 +66,20 @@ the session that built this, or re-run the verification commands in
 2. **Local dev database is ephemeral.** `npx prisma dev` (a local
    Postgres-compatible server with no install/Docker required) must be
    running in a separate terminal for the app to have a database. It is
-   *not* a background service — restart it each dev session. If you see a
-   one-off "Connection terminated unexpectedly" error after running
-   `build`/`start`/`dev` concurrently against it, that's the lightweight
-   local server being momentarily overloaded by multiple connection
-   pools — it self-heals; just retry the request. This is a local-dev-only
-   characteristic and not expected against a real Postgres deployment.
+   *not* a background service — restart it each dev session.
+   `lib/prisma.ts` and `prisma/seed.ts` both cap their connection pool at
+   `max: 1`, which was required to stop this local server from dropping
+   connections under concurrent queries (surfaced as intermittent 500s /
+   "Connection terminated unexpectedly" / P1017 `ConnectionClosed`,
+   confirmed via a standalone repro before/after the fix). This was
+   verified stable across a full 20-step Playwright run end-to-end. If
+   `prisma dev` itself ever wedges after a very long session (rare — hit
+   once during heavy back-to-back build/seed/dev cycling in this build),
+   killing and restarting it resolves it; it prints the same connection
+   strings each time for a given project, so `.env` doesn't need updating.
+   None of this is expected against a real Postgres deployment — the pool
+   cap is a local-dev-only workaround and would be safe to raise (or
+   remove) once pointed at a real database.
 3. **Suspending a user (`isActive = false`) only blocks future logins.**
    An already-issued session JWT is not revoked server-side (there's no
    per-request DB check in `getSession()` — only a signature/expiry
@@ -76,15 +89,27 @@ the session that built this, or re-run the verification commands in
    during this build to smoke-test protected pages with `curl` instead of
    driving a real browser through the Server Action protocol. Not part of
    the app; safe to delete.
-5. **Payments, PF/ESI, insurance, and identity verification are all
+5. **`scripts/verify-e2e.mjs`** (also gitignored) is a Playwright script
+   that actually drives the app in a headless browser: login, search +
+   filter, the full hiring wizard including a live salary calculation,
+   job-request accept -> contract creation, attendance marking, mock
+   payment confirmation, admin verification status changes (checked to
+   persist after a reload), and register-form validation. Last run: 20/20
+   checks passed, zero browser console errors. `playwright` itself IS a
+   committed devDependency (`npm install -D playwright` was already run;
+   `npx playwright install chromium` gets the browser binary). Turning
+   this into a proper committed Vitest+Playwright e2e suite (per-test
+   isolation, no shared demo-account mutation between runs) is a good
+   next step — see below.
+6. **Payments, PF/ESI, insurance, and identity verification are all
    mocked or workflow-only** — see `docs/LEGAL_AND_COMPLIANCE.md` for the
    full list and what a real integration would require.
-6. **No email/SMS/WhatsApp sending.** Notifications are in-app only
+7. **No email/SMS/WhatsApp sending.** Notifications are in-app only
    (`Notification` model + the bell in the portal header). The
    `NotificationType` enum and `Notification` model are structured so a
    real channel could be added by fanning out from the same creation
    points without a schema change.
-7. **`npm audit`** currently reports 4 high-severity advisories, all in
+8. **`npm audit`** currently reports 4 high-severity advisories, all in
    Prisma CLI's own bundled MySQL driver / dev-only tooling dependencies
    (`mysql2`, `deepmerge-ts`) — not reachable from the deployed app, which
    only uses the Postgres driver adapter at runtime. Re-check on your next
@@ -92,9 +117,10 @@ the session that built this, or re-run the verification commands in
 
 ## Suggested next steps (not started)
 
-- Playwright/browser-based end-to-end tests (this build was verified via
-  typecheck + unit tests + `curl`-based smoke tests with minted session
-  cookies, not a real browser click-through).
+- Turn `scripts/verify-e2e.mjs` into a proper committed e2e suite
+  (`@playwright/test`, isolated fixtures/DB state per test instead of
+  mutating the shared seed data run-to-run). The ad hoc script proved the
+  approach works — see the "Playwright" item above.
 - Email verification / password reset flows (architecture placeholders
   only — not implemented).
 - Pagination on admin list pages (users, payments, salary rules) once seed
