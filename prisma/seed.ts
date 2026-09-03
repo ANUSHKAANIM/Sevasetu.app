@@ -174,7 +174,7 @@ async function main() {
     prisma.householdProfile.deleteMany(),
     prisma.adminProfile.deleteMany(),
     prisma.user.deleteMany(),
-  ]);
+  ], { maxWait: 30000, timeout: 30000 });
 
   // ---------------------------------------------------------------------
   // Admin
