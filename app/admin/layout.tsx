@@ -34,6 +34,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <PortalShell
       brandLabel="Admin Portal"
+      userId={session.userId}
       userName={session.name}
       userEmail={session.email}
       navItems={NAV_ITEMS}

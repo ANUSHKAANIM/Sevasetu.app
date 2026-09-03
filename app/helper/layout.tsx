@@ -36,6 +36,7 @@ export default async function HelperLayout({ children }: LayoutProps<"/helper">)
   return (
     <PortalShell
       brandLabel="Helper Portal"
+      userId={session.userId}
       userName={session.name}
       userEmail={session.email}
       navItems={NAV_ITEMS}

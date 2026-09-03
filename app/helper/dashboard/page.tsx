@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { SKILL_TIER_LABEL, PAYMENT_STATUS_LABEL } from "@/lib/constants";
 import { summarizeBalance } from "@/services/leave-service";
+import { PersonAvatar } from "@/components/shared/person-avatar";
 
 export const metadata: Metadata = { title: "Dashboard — SevaSetu Helper" };
 
@@ -130,9 +131,12 @@ export default async function HelperDashboardPage() {
                 return (
                   <div key={c.id} className="rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{c.household.user.name}</p>
-                        <p className="text-sm text-muted-foreground">{c.serviceCategory.name}</p>
+                      <div className="flex items-center gap-3">
+                        <PersonAvatar id={c.household.id} name={c.household.user.name} size="sm" />
+                        <div>
+                          <p className="font-medium">{c.household.user.name}</p>
+                          <p className="text-sm text-muted-foreground">{c.serviceCategory.name}</p>
+                        </div>
                       </div>
                       <p className="font-medium">
                         ₹{Number(c.salaryCalculation.totalPayment).toLocaleString("en-IN")}/mo

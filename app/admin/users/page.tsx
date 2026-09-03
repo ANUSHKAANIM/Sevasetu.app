@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VERIFICATION_STATUS_LABEL } from "@/lib/constants";
 import { toggleUserActiveAction } from "@/app/actions/admin-actions";
+import { PersonAvatar } from "@/components/shared/person-avatar";
 
 export const metadata: Metadata = { title: "Users — SevaSetu Admin" };
 
@@ -46,17 +47,20 @@ export default async function AdminUsersPage({
           ) : (
             users.map((u) => (
               <div key={u.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-medium">{u.name}</p>
-                  <p className="text-sm text-muted-foreground">{u.email} · {u.phone ?? "No phone"}</p>
-                  {u.helperProfile && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {u.helperProfile.city} · Identity: {VERIFICATION_STATUS_LABEL[u.helperProfile.identityVerification]}
-                    </p>
-                  )}
-                  {u.householdProfile && (
-                    <p className="mt-1 text-xs text-muted-foreground">{u.householdProfile.city}</p>
-                  )}
+                <div className="flex items-center gap-3">
+                  <PersonAvatar id={u.id} name={u.name} />
+                  <div>
+                    <p className="font-medium">{u.name}</p>
+                    <p className="text-sm text-muted-foreground">{u.email} · {u.phone ?? "No phone"}</p>
+                    {u.helperProfile && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {u.helperProfile.city} · Identity: {VERIFICATION_STATUS_LABEL[u.helperProfile.identityVerification]}
+                      </p>
+                    )}
+                    {u.householdProfile && (
+                      <p className="mt-1 text-xs text-muted-foreground">{u.householdProfile.city}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={u.isActive ? "success" : "destructive"}>

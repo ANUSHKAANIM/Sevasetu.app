@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PAYMENT_STATUS_LABEL, CONTRACT_STATUS_LABEL } from "@/lib/constants";
+import { PersonAvatar } from "@/components/shared/person-avatar";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Users, IndianRupee, Plane } from "lucide-react";
 
 export const metadata: Metadata = { title: "Dashboard — SevaSetu Household" };
 
@@ -64,6 +67,7 @@ export default async function HouseholdDashboardPage() {
         <CardContent>
           {activeContracts.length === 0 ? (
             <EmptyState
+              icon={Users}
               message="You don't have any active helpers yet."
               actionHref="/household/search"
               actionLabel="Search helpers"
@@ -72,12 +76,15 @@ export default async function HouseholdDashboardPage() {
             <div className="divide-y divide-border">
               {activeContracts.map((c) => (
                 <div key={c.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium">{c.helper.user.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {c.serviceCategory.name} · ₹
-                      {Number(c.salaryCalculation.totalPayment).toLocaleString("en-IN")}/mo
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <PersonAvatar id={c.helper.id} name={c.helper.user.name} size="sm" />
+                    <div>
+                      <p className="font-medium">{c.helper.user.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {c.serviceCategory.name} · ₹
+                        {Number(c.salaryCalculation.totalPayment).toLocaleString("en-IN")}/mo
+                      </p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge variant="success">{CONTRACT_STATUS_LABEL[c.status]}</Badge>
@@ -99,7 +106,7 @@ export default async function HouseholdDashboardPage() {
           </CardHeader>
           <CardContent>
             {upcomingPayments.length === 0 ? (
-              <EmptyState message="No payments due right now." />
+              <EmptyState icon={IndianRupee} message="No payments due right now." />
             ) : (
               <div className="divide-y divide-border">
                 {upcomingPayments.map((p) => (
@@ -132,7 +139,7 @@ export default async function HouseholdDashboardPage() {
           </CardHeader>
           <CardContent>
             {pendingLeaveRequests.length === 0 ? (
-              <EmptyState message="No leave requests waiting on you." />
+              <EmptyState icon={Plane} message="No leave requests waiting on you." />
             ) : (
               <div className="divide-y divide-border">
                 {pendingLeaveRequests.map((lr) => (
@@ -167,23 +174,3 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function EmptyState({
-  message,
-  actionHref,
-  actionLabel,
-}: {
-  message: string;
-  actionHref?: string;
-  actionLabel?: string;
-}) {
-  return (
-    <div className="py-8 text-center">
-      <p className="text-sm text-muted-foreground">{message}</p>
-      {actionHref && actionLabel && (
-        <Button asChild size="sm" className="mt-3">
-          <Link href={actionHref}>{actionLabel}</Link>
-        </Button>
-      )}
-    </div>
-  );
-}

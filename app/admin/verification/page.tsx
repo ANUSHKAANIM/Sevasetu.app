@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminContext } from "@/lib/session-helpers";
 import { Card, CardContent } from "@/components/ui/card";
 import { VerificationFieldControl } from "@/components/admin/verification-field-control";
+import { PersonAvatar } from "@/components/shared/person-avatar";
 
 export const metadata: Metadata = { title: "Verification — SevaSetu Admin" };
 
@@ -29,9 +30,12 @@ export default async function AdminVerificationPage() {
         {helpers.map((h) => (
           <Card key={h.id}>
             <CardContent className="grid grid-cols-1 gap-4 pt-6 sm:grid-cols-5 sm:items-center">
-              <div className="sm:col-span-1">
-                <p className="font-medium">{h.user.name}</p>
-                <p className="text-xs text-muted-foreground">{h.city}</p>
+              <div className="flex items-center gap-3 sm:col-span-1">
+                <PersonAvatar id={h.id} name={h.user.name} size="sm" />
+                <div>
+                  <p className="font-medium">{h.user.name}</p>
+                  <p className="text-xs text-muted-foreground">{h.city}</p>
+                </div>
               </div>
               <VerificationFieldControl helperId={h.id} field="identityVerification" label="Identity" value={h.identityVerification} />
               <VerificationFieldControl helperId={h.id} field="addressVerification" label="Address" value={h.addressVerification} />

@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PersonAvatar } from "@/components/shared/person-avatar";
+import { EmptyState } from "@/components/shared/empty-state";
+import { SearchX } from "lucide-react";
 import {
   CITIES,
   SKILL_TIER_LABEL,
@@ -157,11 +160,14 @@ export default async function HouseholdSearchPage({
             <Card key={h.id}>
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{h.user.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {h.city} · {h.experienceYears} yrs experience
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <PersonAvatar id={h.id} name={h.user.name} />
+                    <div>
+                      <p className="font-medium">{h.user.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {h.city} · {h.experienceYears} yrs experience
+                      </p>
+                    </div>
                   </div>
                   <Badge variant={h.identityVerification === "VERIFIED" ? "success" : "outline"}>
                     {VERIFICATION_STATUS_LABEL[h.identityVerification]}
@@ -190,8 +196,8 @@ export default async function HouseholdSearchPage({
       </div>
 
       {helpers.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="text-muted-foreground">No helpers match these filters yet.</p>
+        <div className="rounded-xl border border-dashed border-border">
+          <EmptyState icon={SearchX} message="No helpers match these filters yet." />
         </div>
       )}
     </div>

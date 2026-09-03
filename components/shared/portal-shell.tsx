@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { PersonAvatar } from "@/components/shared/person-avatar";
 
 export interface PortalNavItem {
   href: string;
@@ -13,6 +14,7 @@ export interface PortalNavItem {
 
 export function PortalShell({
   brandLabel,
+  userId,
   userName,
   userEmail,
   navItems,
@@ -20,6 +22,7 @@ export function PortalShell({
   children,
 }: {
   brandLabel: string;
+  userId: string;
   userName: string;
   userEmail: string;
   navItems: PortalNavItem[];
@@ -50,8 +53,13 @@ export function PortalShell({
           ))}
         </nav>
         <div className="border-t border-border p-4">
-          <p className="truncate text-sm font-medium">{userName}</p>
-          <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
+          <div className="flex items-center gap-3">
+            <PersonAvatar id={userId} name={userName} size="sm" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{userName}</p>
+              <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
+            </div>
+          </div>
           <form action={logoutAction} className="mt-3">
             <Button type="submit" variant="outline" size="sm" className="w-full gap-2">
               <LogOut className="h-3.5 w-3.5" />

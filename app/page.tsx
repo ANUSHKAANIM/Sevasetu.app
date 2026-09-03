@@ -26,6 +26,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/shared/site-header";
 import { SiteFooter } from "@/components/shared/site-footer";
+import { BridgeIllustration } from "@/components/shared/bridge-illustration";
+
+const TILE_STYLES = [
+  "bg-primary/10 text-primary",
+  "bg-accent/15 text-accent",
+  "bg-success/10 text-success",
+];
 
 const SERVICES = [
   { icon: Sparkles, name: "House Cleaning", description: "Sweeping, mopping, deep cleaning and household upkeep." },
@@ -81,24 +88,27 @@ export default async function HomePage() {
       <SiteHeader />
       <main className="flex-1">
         {/* Hero */}
-        <section className="border-b border-border bg-gradient-to-b from-secondary/50 to-background">
-          <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:px-6 sm:py-28">
-            <h1 className="mx-auto max-w-3xl font-serif text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
-              Dignified Work. Trusted Help. Better Homes.
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-muted-foreground">
-              SevaSetu connects households with verified, skilled domestic
-              service professionals — through transparent standardized wages
-              and structured professional growth.
-            </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/auth/register?role=HOUSEHOLD">Find Help</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/auth/register?role=HELPER">Find Work</Link>
-              </Button>
+        <section className="overflow-hidden border-b border-border bg-gradient-to-b from-secondary/50 to-background">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:gap-6">
+            <div className="text-center lg:text-left">
+              <h1 className="mx-auto max-w-xl font-serif text-4xl font-semibold leading-tight text-foreground sm:text-5xl lg:mx-0">
+                Dignified Work. Trusted Help. Better Homes.
+              </h1>
+              <p className="mx-auto mt-5 max-w-xl text-balance text-lg text-muted-foreground lg:mx-0">
+                SevaSetu connects households with verified, skilled domestic
+                service professionals — through transparent standardized wages
+                and structured professional growth.
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+                <Button asChild size="lg">
+                  <Link href="/auth/register?role=HOUSEHOLD">Find Help</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/auth/register?role=HELPER">Find Work</Link>
+                </Button>
+              </div>
             </div>
+            <BridgeIllustration className="mx-auto w-full max-w-md lg:max-w-lg" />
           </div>
         </section>
 
@@ -111,11 +121,11 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {SERVICES.map((s) => (
-              <Card key={s.name}>
+            {SERVICES.map((s, i) => (
+              <Card key={s.name} className="transition-shadow hover:shadow-md">
                 <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-                    <s.icon className="h-5 w-5" />
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${TILE_STYLES[i % TILE_STYLES.length]}`}>
+                    <s.icon className="h-6 w-6" />
                   </div>
                   <div>
                     <p className="font-medium">{s.name}</p>
@@ -137,9 +147,11 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {WHY_SEVASETU.map((f) => (
-                <div key={f.title} className="rounded-xl border border-border bg-card p-6">
-                  <f.icon className="h-6 w-6 text-primary" />
+              {WHY_SEVASETU.map((f, i) => (
+                <div key={f.title} className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${TILE_STYLES[i % TILE_STYLES.length]}`}>
+                    <f.icon className="h-5 w-5" />
+                  </div>
                   <p className="mt-3 font-medium">{f.title}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{f.description}</p>
                 </div>
@@ -192,8 +204,19 @@ export default async function HomePage() {
         </section>
 
         {/* Impact */}
-        <section className="border-t border-border bg-primary text-primary-foreground">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <section className="relative overflow-hidden border-t border-border bg-primary text-primary-foreground">
+          <svg
+            className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.08]"
+            aria-hidden="true"
+          >
+            <defs>
+              <pattern id="dot-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="2" fill="white" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dot-grid)" />
+          </svg>
+          <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6">
             <p className="mb-8 text-center text-sm uppercase tracking-wide text-primary-foreground/70">
               Platform activity — demonstration data from this deployment
             </p>

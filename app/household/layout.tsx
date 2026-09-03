@@ -34,6 +34,7 @@ export default async function HouseholdLayout({
   return (
     <PortalShell
       brandLabel="Household Portal"
+      userId={session.userId}
       userName={session.name}
       userEmail={session.email}
       navItems={NAV_ITEMS}

@@ -6,7 +6,7 @@ import { requireHouseholdContext } from "@/lib/session-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PersonAvatar } from "@/components/shared/person-avatar";
 import {
   SKILL_TIER_LABEL,
   EMPLOYMENT_TYPE_LABEL,
@@ -40,20 +40,12 @@ export default async function HelperProfilePage({
       ? helper.reviews.reduce((sum, r) => sum + r.rating, 0) / helper.reviews.length
       : null;
 
-  const initials = helper.user.name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("");
-
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <Card>
         <CardContent className="flex flex-col gap-6 pt-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-            </Avatar>
+            <PersonAvatar id={helper.id} name={helper.user.name} size="lg" />
             <div>
               <h1 className="font-serif text-2xl font-semibold">{helper.user.name}</h1>
               <p className="text-sm text-muted-foreground">
