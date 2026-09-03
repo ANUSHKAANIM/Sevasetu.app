@@ -5,6 +5,7 @@ import { logoutAction } from "@/app/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { PersonAvatar } from "@/components/shared/person-avatar";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 export interface PortalNavItem {
   href: string;
@@ -89,7 +90,10 @@ export function PortalShell({
             </nav>
           </details>
           <p className="hidden text-sm font-medium text-muted-foreground md:block">{brandLabel}</p>
-          <NotificationBell unreadCount={unreadNotificationCount} />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <NotificationBell unreadCount={unreadNotificationCount} />
+          </div>
         </header>
         <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>

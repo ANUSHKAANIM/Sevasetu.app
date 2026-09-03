@@ -41,6 +41,90 @@
 
   --font-sans: var(--font-inter);
   --font-serif: var(--font-lora);
+
+  color-scheme: light;
+}
+
+/* Dark palette applied when the OS/browser prefers dark AND the user
+   hasn't explicitly chosen light via the in-app toggle. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #12201a;
+    --foreground: #ecf2ee;
+
+    --card: #182a22;
+    --card-foreground: #ecf2ee;
+
+    --popover: #182a22;
+    --popover-foreground: #ecf2ee;
+
+    --primary: #4fb587;
+    --primary-foreground: #08150f;
+
+    --secondary: #243a2f;
+    --secondary-foreground: #ecf2ee;
+
+    --muted: #1e3128;
+    --muted-foreground: #9db3a6;
+
+    --accent: #e2ab5f;
+    --accent-foreground: #251a08;
+
+    --destructive: #e07a63;
+    --destructive-foreground: #2a0d06;
+
+    --success: #5abd8f;
+    --success-foreground: #06180f;
+
+    --warning: #e0ac54;
+    --warning-foreground: #251a08;
+
+    --border: #2b4136;
+    --input: #2b4136;
+    --ring: #4fb587;
+
+    color-scheme: dark;
+  }
+}
+
+/* Explicit dark, chosen via the in-app toggle — wins regardless of OS
+   preference. */
+:root[data-theme="dark"] {
+  --background: #12201a;
+  --foreground: #ecf2ee;
+
+  --card: #182a22;
+  --card-foreground: #ecf2ee;
+
+  --popover: #182a22;
+  --popover-foreground: #ecf2ee;
+
+  --primary: #4fb587;
+  --primary-foreground: #08150f;
+
+  --secondary: #243a2f;
+  --secondary-foreground: #ecf2ee;
+
+  --muted: #1e3128;
+  --muted-foreground: #9db3a6;
+
+  --accent: #e2ab5f;
+  --accent-foreground: #251a08;
+
+  --destructive: #e07a63;
+  --destructive-foreground: #2a0d06;
+
+  --success: #5abd8f;
+  --success-foreground: #06180f;
+
+  --warning: #e0ac54;
+  --warning-foreground: #251a08;
+
+  --border: #2b4136;
+  --input: #2b4136;
+  --ring: #4fb587;
+
+  color-scheme: dark;
 }
 
 @theme inline {

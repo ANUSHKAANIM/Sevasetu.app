@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Lora } from "next/font/google";
+import { ThemeInitScript } from "@/components/shared/theme-init-script";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,8 +24,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${inter.variable} ${lora.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeInitScript />
+        {children}
+      </body>
     </html>
   );
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { roleHomePath } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 export async function SiteHeader() {
   const session = await getSession();
@@ -24,6 +25,7 @@ export async function SiteHeader() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {session ? (
             <Button asChild size="sm">
               <Link href={roleHomePath(session.role)}>Go to dashboard</Link>
