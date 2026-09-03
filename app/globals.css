@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --radius: 0.625rem;
+
+  /* SevaSetu brand: deep bottle green + warm cream, warm approachable, low-flash */
+  --background: #faf7f0;
+  --foreground: #1c231f;
+
+  --card: #ffffff;
+  --card-foreground: #1c231f;
+
+  --popover: #ffffff;
+  --popover-foreground: #1c231f;
+
+  --primary: #10513c;
+  --primary-foreground: #f6faf6;
+
+  --secondary: #e7e1d1;
+  --secondary-foreground: #1c231f;
+
+  --muted: #efeade;
+  --muted-foreground: #5f6a5f;
+
+  --accent: #c98a3c;
+  --accent-foreground: #241a08;
+
+  --destructive: #b3432b;
+  --destructive-foreground: #fdf5f2;
+
+  --success: #1a7a4c;
+  --success-foreground: #f2fbf6;
+
+  --warning: #b8800f;
+  --warning-foreground: #241a08;
+
+  --border: #e1dac8;
+  --input: #e1dac8;
+  --ring: #10513c;
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-lora);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}

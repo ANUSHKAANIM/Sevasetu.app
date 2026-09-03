@@ -1,0 +1,706 @@
+// SevaSetu database schema
+// See docs/LEGAL_AND_COMPLIANCE.md before treating any of this as a
+// production-ready employment / payroll / statutory-benefits system.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  HOUSEHOLD
+  HELPER
+  ADMIN
+}
+
+enum VerificationStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum SkillTier {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum EmploymentType {
+  PART_TIME_2H
+  PART_TIME_4H
+  PART_TIME_8H
+  FULL_TIME
+  LIVE_IN
+}
+
+enum ScopeOfWork {
+  BASIC
+  STANDARD
+  EXTENDED
+}
+
+enum LocationTier {
+  TIER_1
+  TIER_2
+  TIER_3
+}
+
+enum SkillCategory {
+  CLEANING
+  COOKING
+  CHILD_CARE
+  ELDERLY_CARE
+  DRIVING
+}
+
+enum ContractStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  COMPLETED
+  TERMINATED
+}
+
+enum JobRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  CONVERTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LEAVE
+  HALF_DAY
+}
+
+enum LeaveType {
+  SICK
+  ANNUAL
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  OVERDUE
+}
+
+enum BenefitType {
+  PF
+  ESI
+  PAID_LEAVE
+  HEALTH_INSURANCE
+  SAVINGS
+  EMERGENCY_LOAN
+}
+
+enum InsuranceStatus {
+  NOT_ENROLLED
+  PENDING
+  ACTIVE
+  LAPSED
+}
+
+enum ReplacementType {
+  TEMPORARY
+  PERMANENT
+}
+
+enum ReplacementStatus {
+  OPEN
+  MATCHING
+  MATCHED
+  CLOSED
+}
+
+enum GrievanceCategory {
+  PAYMENT_ISSUE
+  WORKPLACE_CONCERN
+  ATTENDANCE_DISPUTE
+  LEAVE_DISPUTE
+  OTHER
+}
+
+enum GrievanceStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum TrainingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum NotificationType {
+  JOB_MATCH
+  LEAVE_APPROVED
+  LEAVE_REJECTED
+  PAYMENT_DUE
+  PAYMENT_COMPLETED
+  REPLACEMENT_FOUND
+  VERIFICATION_UPDATED
+  GRIEVANCE_RESPONSE
+  CONTRACT_UPDATE
+  GENERAL
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  name         String
+  phone        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  householdProfile HouseholdProfile?
+  helperProfile    HelperProfile?
+  adminProfile     AdminProfile?
+
+  notifications Notification[]
+  auditLogs     AuditLog[]        @relation("AuditActor")
+  grievances    Grievance[]       @relation("GrievanceRaisedBy")
+  grievanceMsgs GrievanceMessage[]
+
+  @@index([role])
+}
+
+model HouseholdProfile {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addressLine  String?
+  city         String
+  locationTier LocationTier
+  familySize   Int?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  jobRequests         JobRequest[]
+  contracts           EmploymentContract[]
+  salaryCalculations  SalaryCalculation[]
+  attendanceMarked    AttendanceRecord[]        @relation("AttendanceMarkedBy")
+  leaveReviewed       LeaveRequest[]             @relation("LeaveReviewedBy")
+  payments            Payment[]
+  reviews             Review[]
+  replacementRequests ReplacementRequest[]
+
+  @@index([city])
+}
+
+model HelperProfile {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio          String?
+  gender       String?
+  city         String
+  locationTier LocationTier
+  languages    String[]
+  experienceYears Int       @default(0)
+  skillTier    SkillTier    @default(BASIC)
+  employmentTypePref EmploymentType[]
+  availableFrom DateTime?
+
+  identityVerification   VerificationStatus @default(NOT_STARTED)
+  addressVerification    VerificationStatus @default(NOT_STARTED)
+  referenceVerification  VerificationStatus @default(NOT_STARTED)
+  backgroundCheck        VerificationStatus @default(NOT_STARTED)
+
+  profileCompleteness Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  helperServices      HelperService[]
+  helperSkills        HelperSkill[]
+  trainingEnrollments TrainingEnrollment[]
+  skillAssessments    SkillAssessment[]
+  jobRequests         JobRequest[]
+  contracts           EmploymentContract[]
+  salaryCalculations  SalaryCalculation[]
+  payments            Payment[]
+  reviews             Review[]
+  benefitContributions BenefitContribution[]
+  insuranceEnrollments InsuranceEnrollment[]
+  replacementRequestsAsOriginal ReplacementRequest[] @relation("ReplacementOriginalHelper")
+  replacementRequestsAsMatched  ReplacementRequest[] @relation("ReplacementMatchedHelper")
+
+  @@index([city])
+  @@index([skillTier])
+}
+
+model AdminProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Services & Skills
+// ---------------------------------------------------------------------------
+
+model ServiceCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  createdAt   DateTime @default(now())
+
+  helperServices     HelperService[]
+  salaryRules        SalaryRule[]
+  jobRequests        JobRequest[]
+  contracts          EmploymentContract[]
+  salaryCalculations SalaryCalculation[]
+}
+
+model HelperService {
+  id                String          @id @default(cuid())
+  helperId          String
+  helper            HelperProfile   @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  serviceCategoryId String
+  serviceCategory   ServiceCategory @relation(fields: [serviceCategoryId], references: [id], onDelete: Cascade)
+  yearsExperience   Int             @default(0)
+  createdAt         DateTime        @default(now())
+
+  @@unique([helperId, serviceCategoryId])
+}
+
+model Skill {
+  id          String        @id @default(cuid())
+  name        String
+  category    SkillCategory
+  description String?
+
+  helperSkills HelperSkill[]
+
+  @@unique([name, category])
+}
+
+model HelperSkill {
+  id         String    @id @default(cuid())
+  helperId   String
+  helper     HelperProfile @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  skillId    String
+  skill      Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  level      SkillTier @default(BASIC)
+  assessedAt DateTime  @default(now())
+
+  @@unique([helperId, skillId])
+}
+
+// ---------------------------------------------------------------------------
+// Training
+// ---------------------------------------------------------------------------
+
+model TrainingCourse {
+  id            String        @id @default(cuid())
+  title         String
+  description   String
+  category      SkillCategory
+  durationHours Int
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  enrollments TrainingEnrollment[]
+}
+
+model TrainingEnrollment {
+  id             String         @id @default(cuid())
+  helperId       String
+  helper         HelperProfile  @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  courseId       String
+  course         TrainingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status         TrainingStatus @default(NOT_STARTED)
+  progress       Int            @default(0)
+  enrolledAt     DateTime       @default(now())
+  completedAt    DateTime?
+  certificateRef String?
+
+  @@unique([helperId, courseId])
+}
+
+model SkillAssessment {
+  id           String        @id @default(cuid())
+  helperId     String
+  helper       HelperProfile @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  category     SkillCategory
+  score        Int
+  maxScore     Int           @default(100)
+  assessorName String
+  result       SkillTier
+  notes        String?
+  assessedAt   DateTime      @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Salary engine
+// ---------------------------------------------------------------------------
+
+model SalaryRule {
+  id                    String          @id @default(cuid())
+  serviceCategoryId     String
+  serviceCategory       ServiceCategory @relation(fields: [serviceCategoryId], references: [id], onDelete: Cascade)
+  locationTier          LocationTier
+  skillTier             SkillTier
+  employmentType        EmploymentType
+  scopeOfWork           ScopeOfWork
+  baseSalary            Decimal         @db.Decimal(10, 2)
+  skillAdjustmentPercent Decimal        @db.Decimal(5, 2) @default(0)
+  scopeAdjustmentPercent Decimal        @db.Decimal(5, 2) @default(0)
+  platformFeePercent    Decimal         @db.Decimal(5, 2) @default(10)
+  isActive              Boolean         @default(true)
+  effectiveFrom         DateTime        @default(now())
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  salaryCalculations SalaryCalculation[]
+
+  @@unique([serviceCategoryId, locationTier, skillTier, employmentType, scopeOfWork])
+}
+
+// A frozen snapshot of a salary computation. Referenced by JobRequest /
+// EmploymentContract so later SalaryRule edits never retroactively change
+// an existing agreement.
+model SalaryCalculation {
+  id                String           @id @default(cuid())
+  salaryRuleId      String?
+  salaryRule        SalaryRule?      @relation(fields: [salaryRuleId], references: [id])
+  householdId       String?
+  household         HouseholdProfile? @relation(fields: [householdId], references: [id])
+  helperId          String?
+  helper            HelperProfile?   @relation(fields: [helperId], references: [id])
+  serviceCategoryId String
+  serviceCategory   ServiceCategory  @relation(fields: [serviceCategoryId], references: [id])
+  locationTier      LocationTier
+  skillTier         SkillTier
+  employmentType    EmploymentType
+  scopeOfWork       ScopeOfWork
+
+  baseSalary       Decimal @db.Decimal(10, 2)
+  skillAdjustment  Decimal @db.Decimal(10, 2)
+  scopeAdjustment  Decimal @db.Decimal(10, 2)
+  workerSalary     Decimal @db.Decimal(10, 2)
+  platformFee      Decimal @db.Decimal(10, 2)
+  totalPayment     Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  jobRequests JobRequest[]
+  contracts   EmploymentContract[]
+}
+
+// ---------------------------------------------------------------------------
+// Hiring / employment
+// ---------------------------------------------------------------------------
+
+model JobRequest {
+  id                  String            @id @default(cuid())
+  householdId         String
+  household           HouseholdProfile  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  helperId            String
+  helper              HelperProfile     @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  serviceCategoryId   String
+  serviceCategory     ServiceCategory   @relation(fields: [serviceCategoryId], references: [id])
+  salaryCalculationId String?
+  salaryCalculation   SalaryCalculation? @relation(fields: [salaryCalculationId], references: [id])
+  status              JobRequestStatus  @default(PENDING)
+  message             String?
+  workSchedule        Json?
+  responsibilities    String[]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  contract EmploymentContract?
+
+  @@index([householdId])
+  @@index([helperId])
+}
+
+model EmploymentContract {
+  id                  String            @id @default(cuid())
+  householdId         String
+  household           HouseholdProfile  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  helperId            String
+  helper              HelperProfile     @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  serviceCategoryId   String
+  serviceCategory     ServiceCategory   @relation(fields: [serviceCategoryId], references: [id])
+  jobRequestId        String?           @unique
+  jobRequest          JobRequest?       @relation(fields: [jobRequestId], references: [id])
+  salaryCalculationId String
+  salaryCalculation   SalaryCalculation @relation(fields: [salaryCalculationId], references: [id])
+
+  responsibilities String[]
+  workSchedule     Json
+  leavePolicy      Json
+  startDate        DateTime
+  endDate          DateTime?
+  status           ContractStatus @default(DRAFT)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  attendanceRecords   AttendanceRecord[]
+  leaveBalance        LeaveBalance?
+  leaveRequests       LeaveRequest[]
+  payments            Payment[]
+  paymentSchedule     PaymentSchedule?
+  reviews             Review[]
+  replacementRequests ReplacementRequest[]
+  grievances          Grievance[]
+
+  @@index([householdId])
+  @@index([helperId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Attendance & leave
+// ---------------------------------------------------------------------------
+
+model AttendanceRecord {
+  id           String              @id @default(cuid())
+  contractId   String
+  contract     EmploymentContract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  date         DateTime            @db.Date
+  status       AttendanceStatus
+  markedById   String
+  markedBy     HouseholdProfile    @relation("AttendanceMarkedBy", fields: [markedById], references: [id])
+  notes        String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@unique([contractId, date])
+  @@index([contractId])
+}
+
+model LeaveBalance {
+  id           String             @id @default(cuid())
+  contractId   String             @unique
+  contract     EmploymentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  year         Int
+  sickTotal    Int                @default(12)
+  sickUsed     Int                @default(0)
+  annualTotal  Int                @default(15)
+  annualUsed   Int                @default(0)
+  unpaidUsed   Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model LeaveRequest {
+  id           String             @id @default(cuid())
+  contractId   String
+  contract     EmploymentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  leaveType    LeaveType
+  startDate    DateTime           @db.Date
+  endDate      DateTime           @db.Date
+  reason       String
+  status       LeaveStatus        @default(PENDING)
+  reviewedById String?
+  reviewedBy   HouseholdProfile?  @relation("LeaveReviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([contractId])
+}
+
+// ---------------------------------------------------------------------------
+// Payments & benefits (all mock / demo — see docs/LEGAL_AND_COMPLIANCE.md)
+// ---------------------------------------------------------------------------
+
+model PaymentSchedule {
+  id            String             @id @default(cuid())
+  contractId    String             @unique
+  contract      EmploymentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  dueDayOfMonth Int                @default(5)
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+
+  payments Payment[]
+}
+
+model Payment {
+  id                String            @id @default(cuid())
+  contractId        String
+  contract          EmploymentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  paymentScheduleId String?
+  paymentSchedule   PaymentSchedule?  @relation(fields: [paymentScheduleId], references: [id])
+  householdId       String
+  household         HouseholdProfile  @relation(fields: [householdId], references: [id])
+  helperId          String
+  helper            HelperProfile     @relation(fields: [helperId], references: [id])
+
+  periodMonth  Int
+  periodYear   Int
+  workerSalary Decimal       @db.Decimal(10, 2)
+  platformFee  Decimal       @db.Decimal(10, 2)
+  totalAmount  Decimal       @db.Decimal(10, 2)
+  status       PaymentStatus @default(PENDING)
+  dueDate      DateTime      @db.Date
+  paidAt       DateTime?
+  providerRef  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([contractId, periodMonth, periodYear])
+  @@index([householdId])
+  @@index([helperId])
+  @@index([status])
+}
+
+model BenefitContribution {
+  id              String      @id @default(cuid())
+  helperId        String
+  helper          HelperProfile @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  benefitType     BenefitType
+  month           Int
+  year            Int
+  employeeAmount  Decimal     @db.Decimal(10, 2) @default(0)
+  employerAmount  Decimal     @db.Decimal(10, 2) @default(0)
+  createdAt       DateTime    @default(now())
+
+  @@unique([helperId, benefitType, month, year])
+}
+
+model InsuranceEnrollment {
+  id         String           @id @default(cuid())
+  helperId   String
+  helper     HelperProfile    @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  provider   String
+  policyType String
+  status     InsuranceStatus  @default(NOT_ENROLLED)
+  enrolledAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Replacement, reviews, grievances, notifications, audit
+// ---------------------------------------------------------------------------
+
+model ReplacementRequest {
+  id                String             @id @default(cuid())
+  contractId        String
+  contract          EmploymentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  householdId       String
+  household         HouseholdProfile   @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  originalHelperId  String
+  originalHelper    HelperProfile      @relation("ReplacementOriginalHelper", fields: [originalHelperId], references: [id])
+  matchedHelperId   String?
+  matchedHelper     HelperProfile?     @relation("ReplacementMatchedHelper", fields: [matchedHelperId], references: [id])
+  type              ReplacementType
+  reason            String
+  status            ReplacementStatus  @default(OPEN)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model Review {
+  id          String             @id @default(cuid())
+  contractId  String
+  contract    EmploymentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  householdId String
+  household   HouseholdProfile   @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  helperId    String
+  helper      HelperProfile      @relation(fields: [helperId], references: [id], onDelete: Cascade)
+  rating      Int
+  comment     String?
+  createdAt   DateTime           @default(now())
+
+  @@unique([contractId])
+  @@index([helperId])
+}
+
+model Grievance {
+  id           String              @id @default(cuid())
+  raisedById   String
+  raisedBy     User                @relation("GrievanceRaisedBy", fields: [raisedById], references: [id], onDelete: Cascade)
+  contractId   String?
+  contract     EmploymentContract? @relation(fields: [contractId], references: [id])
+  category     GrievanceCategory
+  subject      String
+  description  String
+  status       GrievanceStatus     @default(OPEN)
+  adminNotes   String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  messages GrievanceMessage[]
+
+  @@index([raisedById])
+  @@index([status])
+}
+
+model GrievanceMessage {
+  id             String    @id @default(cuid())
+  grievanceId    String
+  grievance      Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User      @relation(fields: [authorId], references: [id])
+  message        String
+  isInternalNote Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  @@index([grievanceId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
