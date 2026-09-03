@@ -39,12 +39,17 @@ export class NoSalaryRuleError extends Error {
   input: SalaryCalculationInput;
 }
 
+// Accepts either plain numbers/strings (as used in tests) or Prisma's
+// Decimal type (as returned by prisma.salaryRule.findFirst) — anything
+// that Number() can coerce.
+type Numeric = number | string | { toString(): string };
+
 export interface SalaryRuleLike {
   id: string;
-  baseSalary: number | string;
-  skillAdjustmentPercent: number | string;
-  scopeAdjustmentPercent: number | string;
-  platformFeePercent: number | string;
+  baseSalary: Numeric;
+  skillAdjustmentPercent: Numeric;
+  scopeAdjustmentPercent: Numeric;
+  platformFeePercent: Numeric;
 }
 
 /**
