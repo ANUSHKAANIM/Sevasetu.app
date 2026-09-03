@@ -165,10 +165,27 @@ All four currently pass clean against this codebase.
 
 ## 12. Deployment
 
-Not deployed. For a real deployment you would need: a managed PostgreSQL
-instance (Prisma Postgres, RDS, etc.) in place of `prisma dev`, a real
-`SESSION_SECRET`, and — before going anywhere near real users — the
-items in [docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md).
+Deployed on Vercel: **https://sevasetu-anushkas-projects-cfaf755b.vercel.app**
+
+- Database: a managed Prisma Postgres instance (Vercel Storage / Prisma
+  marketplace integration), separate from the local `prisma dev` server
+  used for development. `DATABASE_URL` is set as a Vercel project env var
+  for Production, Preview, and Development.
+- `SESSION_SECRET` is a distinct, randomly generated production secret
+  (not the one in your local `.env`).
+- `postinstall: prisma generate` runs the Prisma Client generation step
+  Vercel's build otherwise skips.
+- Migrations were applied with `prisma migrate deploy` and the database
+  was seeded with the same demo data described above, so the demo
+  accounts work on the live URL too.
+- Deployment Protection (Vercel SSO) is off, so the URL is publicly
+  reachable — anyone can view it, but the app's own login still gates
+  every portal.
+
+For a from-scratch deployment elsewhere, you'd need: a managed
+PostgreSQL instance in place of `prisma dev`, a real `SESSION_SECRET`,
+and — before going anywhere near real users — the items in
+[docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md).
 
 ## 13. Known limitations
 
