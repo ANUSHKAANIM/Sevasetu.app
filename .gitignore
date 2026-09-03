@@ -38,6 +38,8 @@ yarn-error.log*
 
 # dev-only tooling, not part of the app
 /scripts/dev-mint-token.js
+/scripts/verify-e2e.mjs
+/scripts/.e2e-shots/
 
 # typescript
 *.tsbuildinfo

@@ -3,7 +3,9 @@ import { PrismaClient, type EmploymentType, type LocationTier, type SkillCategor
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 
-const adapter = new PrismaPg(process.env.DATABASE_URL!);
+// max: 1 works around `prisma dev`'s lightweight local server dropping
+// connections under concurrency — see lib/prisma.ts for details.
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL!, max: 1 });
 const prisma = new PrismaClient({ adapter });
 
 const DEMO_PASSWORD = "Password123!";
