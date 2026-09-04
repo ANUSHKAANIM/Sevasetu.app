@@ -1,30 +1,20 @@
 import {
-  LayoutDashboard,
-  UserCircle,
-  Award,
-  GraduationCap,
+  House,
   Briefcase,
-  CalendarCheck,
-  Plane,
   IndianRupee,
-  ShieldPlus,
-  MessageSquareWarning,
+  UserCircle,
+  LifeBuoy,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireHelperContext } from "@/lib/session-helpers";
 import { PortalShell, type PortalNavItem } from "@/components/shared/portal-shell";
 
 const NAV_ITEMS: PortalNavItem[] = [
-  { href: "/helper/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/helper/dashboard", label: "Home", icon: House },
+  { href: "/helper/jobs", label: "My Jobs", icon: Briefcase },
+  { href: "/helper/money", label: "My Money", icon: IndianRupee },
   { href: "/helper/profile", label: "My Profile", icon: UserCircle },
-  { href: "/helper/skills", label: "Skills & Assessments", icon: Award },
-  { href: "/helper/training", label: "Training", icon: GraduationCap },
-  { href: "/helper/jobs", label: "Job Matches", icon: Briefcase },
-  { href: "/helper/attendance", label: "Attendance", icon: CalendarCheck },
-  { href: "/helper/leave", label: "Leave", icon: Plane },
-  { href: "/helper/payments", label: "Payments", icon: IndianRupee },
-  { href: "/helper/benefits", label: "Benefits", icon: ShieldPlus },
-  { href: "/helper/grievances", label: "Grievances", icon: MessageSquareWarning },
+  { href: "/helper/grievances", label: "Get Help", icon: LifeBuoy },
 ];
 
 export default async function HelperLayout({ children }: LayoutProps<"/helper">) {

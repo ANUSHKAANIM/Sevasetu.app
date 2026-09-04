@@ -26,11 +26,11 @@ export async function confirmPaymentAction(paymentId: string) {
         type: "PAYMENT_COMPLETED",
         title: "Payment received",
         message: `A payment of ₹${Number(payment.totalAmount).toLocaleString("en-IN")} has been marked paid.`,
-        link: "/helper/payments",
+        link: "/helper/money",
       },
     });
   }
 
   revalidatePath("/household/payments");
-  revalidatePath("/helper/payments");
+  revalidatePath("/helper/money");
 }

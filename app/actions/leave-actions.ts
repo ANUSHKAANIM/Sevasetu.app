@@ -68,7 +68,7 @@ export async function submitLeaveRequestAction(
     },
   });
 
-  revalidatePath("/helper/leave");
+  revalidatePath("/helper/jobs");
   revalidatePath("/household/leave");
   return { success: true };
 }
@@ -92,12 +92,12 @@ export async function approveLeaveRequestAction(leaveRequestId: string) {
       type: "LEAVE_APPROVED",
       title: "Leave request approved",
       message: `Your ${leaveRequest.leaveType.toLowerCase()} leave request has been approved.`,
-      link: "/helper/leave",
+      link: "/helper/jobs",
     },
   });
 
   revalidatePath("/household/leave");
-  revalidatePath("/helper/leave");
+  revalidatePath("/helper/jobs");
 }
 
 export async function rejectLeaveRequestAction(leaveRequestId: string) {
@@ -122,10 +122,10 @@ export async function rejectLeaveRequestAction(leaveRequestId: string) {
       type: "LEAVE_REJECTED",
       title: "Leave request rejected",
       message: `Your ${leaveRequest.leaveType.toLowerCase()} leave request was not approved.`,
-      link: "/helper/leave",
+      link: "/helper/jobs",
     },
   });
 
   revalidatePath("/household/leave");
-  revalidatePath("/helper/leave");
+  revalidatePath("/helper/jobs");
 }

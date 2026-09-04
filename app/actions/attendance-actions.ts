@@ -61,6 +61,6 @@ export async function markAttendanceAction(
   });
 
   revalidatePath("/household/attendance");
-  revalidatePath("/helper/attendance");
+  revalidatePath("/helper/jobs");
   return { success: true };
 }

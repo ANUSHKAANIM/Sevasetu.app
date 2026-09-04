@@ -13,7 +13,7 @@ export async function enrollInCourseAction(courseId: string) {
     update: {},
   });
 
-  revalidatePath("/helper/training");
+  revalidatePath("/helper/profile");
 }
 
 export async function advanceTrainingProgressAction(enrollmentId: string) {
@@ -37,7 +37,7 @@ export async function advanceTrainingProgressAction(enrollmentId: string) {
     },
   });
 
-  revalidatePath("/helper/training");
+  revalidatePath("/helper/profile");
 }
 
 export interface TrainingCourseFormState {

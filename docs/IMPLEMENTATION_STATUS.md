@@ -35,13 +35,22 @@ current state.
   responsibilities → live standardized salary preview → review & confirm),
   contracts list/detail, attendance marking, leave review/approval,
   payments (mock confirm), replacement requests, grievances.
-- **Helper portal** — dashboard, editable profile with a transparent
-  profile-completeness score, services manager, skills & assessment
-  history, training catalog (enroll/progress/certificate), job matches
-  (job requests ranked by the documented `MatchingService` score, with
-  accept/decline), contract detail, attendance view, leave requests,
-  payment history, benefits dashboard (demo/integration-pending labeled),
-  grievances.
+- **Helper portal** — deliberately redesigned for low-literacy / low
+  digital-confidence users after feedback that the original 10-item nav
+  was too complex for its actual audience. Now 5 nav items: **Home** (a
+  big-tile launcher, not a stats dashboard), **My Jobs** (offers to
+  accept/decline + current work + attendance + leave, all as plain-
+  language stacked sections on one page, no tabs), **My Money** (payments
+  + benefits together), **My Profile** (profile + skills + training
+  together), **Get Help** (grievances). Plain wording throughout
+  ("Approved ✓" instead of `VERIFIED`, no match-score-formula explanation)
+  and larger touch targets. All underlying functionality is unchanged —
+  this was a navigation/presentation consolidation, not a feature cut.
+  The old separate routes (`/helper/skills`, `/training`, `/attendance`,
+  `/leave`, `/benefits`, `/payments`) were deleted, not just unlisted —
+  check `app/actions/*.ts` `revalidatePath`/notification `link` calls if
+  you add a new helper-facing route, since several were updated to point
+  at the merged pages.
 - **Admin portal** — dashboard, user management (activate/suspend), the
   verification workflow console, a salary-rule editor over the full wage
   matrix, jobs & contracts overview, payment management by status,
@@ -59,6 +68,16 @@ current state.
 
 ## Known limitations / things a future session should know
 
+0. **Never let `vercel link` / `vercel env pull` leave a `.env.local` file
+   sitting around.** Next.js loads `.env.local` with *higher* priority
+   than `.env`, and Vercel's CLI writes the linked project's env vars
+   (including the **production** `DATABASE_URL`) into exactly that file.
+   A dev server process already running when `.env.local` appears keeps
+   its old (safe, local) env in memory, but any *fresh* `npm run dev` /
+   `npm run build` afterward will silently connect to production. Delete
+   `.env.local` right after you're done with whatever `vercel` command
+   created it (it's gitignored, so this is just local hygiene, not a repo
+   change).
 1. **GitHub CLI (`gh`) is not installed** in this environment, so the repo
    has not been pushed anywhere. Once `gh` is available and authenticated
    (or a remote is added manually), push with the usual `git remote add` /
